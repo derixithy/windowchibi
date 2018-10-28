@@ -58,7 +58,7 @@ static void move_win() {
         unsigned int w_r, h_r, bw_r, depth_r;
         XGetGeometry(dpy, focus, &root_r, &x_r, &y_r, &w_r, &h_r, &bw_r, &depth_r);
         //wc.x = x_r + w_r + bw_r * 2 - win_w; 
-        wc.x = x_r + (int)((w_r + bw_r * 2 - win_w) * 0.7);
+        wc.x = x_r + w_r + bw_r * 2 - win_w;
         wc.y = y_r - win_h;
     }
     XConfigureWindow(dpy, win, CWX | CWY, &wc);
