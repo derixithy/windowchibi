@@ -25,7 +25,7 @@ static int x_error_handler(Display *, XErrorEvent *);
 static int running = 1;
 static Display *dpy = NULL;
 static Screen *scr = NULL;
-static Window root, focus, win;
+static Window root, focus = None, win;
 static int win_w, win_h;
 static int win_x_def, win_y_def;
 
@@ -56,8 +56,8 @@ static void move_win() {
         Window root_r;
         int x_r, y_r;
         unsigned int w_r, h_r, bw_r, depth_r;
+        /* can throw a BadWindow error */
         XGetGeometry(dpy, focus, &root_r, &x_r, &y_r, &w_r, &h_r, &bw_r, &depth_r);
-        //wc.x = x_r + w_r + bw_r * 2 - win_w; 
         wc.x = x_r + w_r + bw_r * 2 - win_w;
         wc.y = y_r - win_h;
     }
@@ -88,9 +88,9 @@ static void setup() {
     win_y_def = HeightOfScreen(scr) - win_h;
 
     XSetWindowAttributes wa;
-    wa.event_mask = FocusChangeMask | SubstructureNotifyMask;
+    wa.event_mask = SubstructureNotifyMask | PropertyChangeMask;
     wa.override_redirect = 1;
-    wa.colormap = cm ;
+    wa.colormap = cm;
     wa.border_pixel = 0;
     wa.background_pixel = 0;
 
@@ -145,6 +145,7 @@ static void update_focus() {
     int status = XGetWindowProperty(dpy, root, active_window_atom, 0, 1000, False, 
         AnyPropertyType, &actual_type_r, &actual_format_r, &nitems_r, &bytes_after_r, &prop_r);
     if(status != Success) return;
+    if(!prop_r) return;
     focus = (prop_r[0] << 0) | (prop_r[1] << 8) | (prop_r[2] << 16) | (prop_r[3] << 24);
 }
 
@@ -166,9 +167,12 @@ int main(int argc, char *argv[]) {
     while(running && !XNextEvent(dpy, &ev)) {
         switch(ev.type) {
         case MapNotify:
+            if(!ev.xmap.override_redirect) XRaiseWindow(dpy, win);
+            break;
+        case PropertyNotify:
+            if(ev.xproperty.atom == active_window_atom) update_focus();
+            /* fall through */
         case ConfigureNotify:
-        case FocusOut:
-            update_focus();
             move_win();
             break;
         }
