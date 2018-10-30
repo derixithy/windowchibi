@@ -84,8 +84,6 @@ static void setup() {
     imlib_context_set_image(img);
     win_w = imlib_image_get_width();
     win_h = imlib_image_get_height();
-    win_x_def = WidthOfScreen(scr) - win_w;
-    win_y_def = HeightOfScreen(scr) - win_h;
 
     XSetWindowAttributes wa;
     wa.event_mask = SubstructureNotifyMask | PropertyChangeMask;
@@ -156,10 +154,13 @@ static int x_error_handler(Display *dpy, XErrorEvent *ev) {
 
 /* main program */
 int main(int argc, char *argv[]) {
-    if(argc != 2) die("wrong usage (%s <path/to/file>)", argv[0]);
+    if(argc != 4) die("wrong usage (%s <path/to/file> <default x> <default y>)", argv[0]);
     img_path = argv[1];
     img = imlib_load_image(img_path);
     if(!img_path) die("cannot load image %s");
+
+    win_x_def = atoi(argv[2]); 
+    win_y_def = atoi(argv[3]); 
 
     setup();
 
