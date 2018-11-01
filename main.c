@@ -17,6 +17,7 @@
 /* function declarations */
 static void die(const char *, ...);
 static void move_win();
+static void render_image();
 static void setup();
 static void update_focus();
 static int x_error_handler(Display *, XErrorEvent *);
@@ -30,6 +31,7 @@ static int win_w, win_h;
 static int win_x_def, win_y_def;
 
 static Atom active_window_atom;
+static Picture pict, pict_mask, pict_win;
 
 /* user-set options */
 static char *img_path = NULL;
@@ -65,6 +67,12 @@ static void move_win() {
     XSync(dpy, 0);
 }
 
+static void render_image() {
+    XClearWindow(dpy, win);
+    XRenderComposite(dpy, PictOpOver, pict, pict_mask, pict_win, 0, 0, 0, 0, 0, 0, win_w, win_h);
+    XSync(dpy, 0);
+}
+
 static void setup() {
     XSetErrorHandler(x_error_handler);
 
@@ -86,7 +94,7 @@ static void setup() {
     win_h = imlib_image_get_height();
 
     XSetWindowAttributes wa;
-    wa.event_mask = SubstructureNotifyMask | PropertyChangeMask;
+    wa.event_mask = SubstructureNotifyMask | PropertyChangeMask | ExposureMask;
     wa.override_redirect = 1;
     wa.colormap = cm;
     wa.border_pixel = 0;
@@ -119,17 +127,17 @@ static void setup() {
     imlib_context_set_drawable(mask);
     imlib_render_image_on_drawable(0, 0);
 
-    Picture pict = XRenderCreatePicture(dpy, pm, XRenderFindStandardFormat(dpy, PictStandardARGB32), 0, 0);
-    Picture pict_win = XRenderCreatePicture(dpy, win, XRenderFindVisualFormat(dpy, vinfo.visual), 0, 0);
-    Picture pict_mask = XRenderCreatePicture(dpy, mask, XRenderFindVisualFormat(dpy, vinfo.visual), 0, 0);
+    pict = XRenderCreatePicture(dpy, pm, XRenderFindStandardFormat(dpy, PictStandardARGB32), 0, 0);
+    pict_mask = XRenderCreatePicture(dpy, mask, XRenderFindVisualFormat(dpy, vinfo.visual), 0, 0);
+    pict_win = XRenderCreatePicture(dpy, win, XRenderFindVisualFormat(dpy, vinfo.visual), 0, 0);
 
-    XRenderComposite(dpy, PictOpOver, pict, pict_mask, pict_win, 0, 0, 0, 0, 0, 0, win_w, win_h);
+    render_image();
 
-    XRenderFreePicture(dpy, pict_mask);
-    XRenderFreePicture(dpy, pict_win);
-    XRenderFreePicture(dpy, pict);   
-    XFreePixmap(dpy, mask);
-    XFreePixmap(dpy, pm);
+    //XRenderFreePicture(dpy, pict_mask);
+    //XRenderFreePicture(dpy, pict_win);
+    //XRenderFreePicture(dpy, pict);   
+    //XFreePixmap(dpy, mask);
+    //XFreePixmap(dpy, pm);
 
     update_focus();
     move_win();
@@ -175,6 +183,9 @@ int main(int argc, char *argv[]) {
             /* fall through */
         case ConfigureNotify:
             move_win();
+            break;
+        case Expose:
+            render_image();
             break;
         }
     }
