@@ -107,7 +107,7 @@ static void setup() {
     class_hint->res_name = "windowchibi";
     class_hint->res_class = "windowchibi";
 
-    win = XCreateWindow(dpy, root, 0, 0, win_w, win_h, 0, vinfo.depth, CopyFromParent, 
+    win = XCreateWindow(dpy, root, 0, 0, win_w, win_h, 0, vinfo.depth, CopyFromParent,
         vinfo.visual, CWColormap | CWBorderPixel | CWBackPixel | CWOverrideRedirect, &wa);
     XSetClassHint(dpy, win, class_hint);
     XMapRaised(dpy, win);
@@ -135,7 +135,7 @@ static void setup() {
 
     //XRenderFreePicture(dpy, pict_mask);
     //XRenderFreePicture(dpy, pict_win);
-    //XRenderFreePicture(dpy, pict);   
+    //XRenderFreePicture(dpy, pict);
     //XFreePixmap(dpy, mask);
     //XFreePixmap(dpy, pm);
 
@@ -148,7 +148,7 @@ static void update_focus() {
     int actual_format_r;
     unsigned long nitems_r, bytes_after_r;
     unsigned char *prop_r;
-    int status = XGetWindowProperty(dpy, root, active_window_atom, 0, 1000, False, 
+    int status = XGetWindowProperty(dpy, root, active_window_atom, 0, 1000, False,
         AnyPropertyType, &actual_type_r, &actual_format_r, &nitems_r, &bytes_after_r, &prop_r);
     if(status != Success) return;
     if(!prop_r) return;
@@ -167,8 +167,8 @@ int main(int argc, char *argv[]) {
     img = imlib_load_image(img_path);
     if(!img_path) die("cannot load image %s");
 
-    win_x_def = atoi(argv[2]); 
-    win_y_def = atoi(argv[3]); 
+    win_x_def = atoi(argv[2]);
+    win_y_def = atoi(argv[3]);
 
     setup();
 
