@@ -7,7 +7,7 @@ PC_LIBS = imlib2 x11 xrender
 PKG_CONFIG = $(shell pkg-config --cflags --libs $(PC_LIBS))
 
 all:
-	$(CC) $(CFLAGS) $(PKG_CONFIG) main.c -o $(APP)
+	$(CC) main.c -o $(APP) $(CFLAGS) $(PKG_CONFIG)
 
 clean:
 	rm -f $(APP)
